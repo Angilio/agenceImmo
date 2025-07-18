@@ -44,7 +44,7 @@ class PropertyController extends Controller
 
 
 
-    public function show( Bien $property)
+    public function show(Bien $property)
     {
         return view('biens.show', [
             'property' => $property

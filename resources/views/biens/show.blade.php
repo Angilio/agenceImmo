@@ -45,7 +45,7 @@
                 @csrf
                 @method('post')
                 @include('shared.input' , ['label' => 'Nom','class' => 'mt-3 w-100 ', 'name'=> 'name','value' => old('email', Auth::check() ? Auth::user()->name : '')])
-                @include('shared.input' , ['label' => 'Prénoms','class' => 'mt-3 w-100', 'name'=> 'firstName'])
+                @include('shared.input' , ['label' => 'Prénoms','class' => 'mt-3 w-100', 'name'=> 'prenoms', old('prenoms', Auth::check() ? Auth::user()->prenoms : '')])
                 @include('shared.input' , ['label' => 'Telephone','class' => 'mt-3 w-100', 'name'=> 'mobile'])
                 @include('shared.input' , ['type' => 'email','label' => 'E-mail','class' => 'mt-3 w-100', 'name'=> 'email','value' => old('email', Auth::check() ? Auth::user()->email : '')])
                 @include('shared.input' , ['label' => 'Message','type' => 'textarea','class' => 'mt-3 w-100', 'name'=> 'message'])

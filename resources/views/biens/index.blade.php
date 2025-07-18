@@ -7,7 +7,7 @@
             <p>{{ $s }}</p>
         @endforeach --}}
         <div class="mt-3">
-            <form action="" method="get" class="container gap-2 d-flex justify-content-between flex-column flex-lg-row">
+            <form action="" method="get" class="gap-2 d-flex justify-content-between flex-column flex-lg-row">
                 <input type="number" placeholder="Budget max" name="price" class="form-control" value="{{ $input['price'] ?? '' }}">
                 <input type="number" placeholder="Surface minimale" name="surface" class="form-control" value="{{ $input['surface'] ?? '' }}">
                 <input type="text" placeholder="Mot clé" name="title" class="form-control" value="{{ $input['title'] ?? '' }}">

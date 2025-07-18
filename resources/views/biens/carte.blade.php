@@ -3,7 +3,7 @@
 @section('title', 'Les biens sur une carte')
 
 @section('content')
-    <div id="map" style="height: 100vh;"></div>
+    <div id="map" style="height: 100vh; z-index: 0;"></div>
 
     <!-- POPUP CARD -->
     <div id="popupCard"
@@ -21,6 +21,7 @@
             </div>
             <p id="popupDescription" class="mt-2"></p>
             <p id="popupInfos"></p>
+            <button class="btn-close position-absolute top-0 end-0 m-2" id="closePopup" aria-label="Fermer"></button>
         </div>
     </div>
 
@@ -31,14 +32,12 @@
             justify-content: center;
         }
 
-        /* Permet de garder le popup par dessus tout */
         #popupCard {
             background: white;
             border: 1px solid #ccc;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        /* Empêche le clic dans la carte de propager le clic "extérieur" */
         #popupCard * {
             pointer-events: auto;
         }
@@ -47,6 +46,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const map = L.map('map').setView([-12.276, 49.291], 14); // Diego
+            let selectedMarker = null;
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
@@ -70,12 +70,11 @@
                             else if (bien.type_bien_id == 2) {
                                 iconClass = 'fa-solid fa-play';
                                 rotation = '-90deg';
-                            }
-                            else if (bien.type_bien_id == 3) iconClass = 'fa-solid fa-circle';
+                            } else if (bien.type_bien_id == 3) iconClass = 'fa-solid fa-circle';
 
                             const color = bien.type_vente_id == 2 ? 'blue' : 'gold';
 
-                            const icon = L.divIcon({
+                            const defaultIcon = (color) => L.divIcon({
                                 className: 'custom-fa-icon',
                                 html: `<div style="color:${color}; font-size:24px; transform: rotate(${rotation});">
                                             <i class="${iconClass}"></i>
@@ -84,11 +83,23 @@
                                 iconAnchor: [15, 15],
                             });
 
-                            const marker = L.marker([bien.latitude, bien.longitude], { icon }).addTo(map);
+                            const marker = L.marker([bien.latitude, bien.longitude], {
+                                icon: defaultIcon(color)
+                            }).addTo(map);
 
                             marker.on('click', (e) => {
                                 showPopup(bien);
-                                e.originalEvent.stopPropagation(); // 🔒 Pour éviter de déclencher la fermeture
+                                e.originalEvent.stopPropagation();
+
+                                // Reset previous icon
+                                if (selectedMarker && selectedMarker.setIcon) {
+                                    selectedMarker.setIcon(defaultIcon(selectedMarker.originalColor));
+                                }
+
+                                // Set red icon
+                                marker.setIcon(defaultIcon('red'));
+                                marker.originalColor = color; // store original
+                                selectedMarker = marker;
                             });
                         }
                     });
@@ -124,11 +135,40 @@
                 popup.style.display = 'block';
             }
 
-            // Fermer le popup si on clique à l'extérieur
+            // Fermer le popup si on clique à l’extérieur
             document.addEventListener('click', function (e) {
                 const popup = document.getElementById('popupCard');
                 if (!popup.contains(e.target)) {
                     popup.style.display = 'none';
+
+                    // Reset selected marker color
+                    if (selectedMarker && selectedMarker.setIcon) {
+                        selectedMarker.setIcon(L.divIcon({
+                            className: 'custom-fa-icon',
+                            html: `<div style="color:${selectedMarker.originalColor}; font-size:24px;">
+                                        <i class="fa-solid fa-circle"></i>
+                                   </div>`,
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15],
+                        }));
+                        selectedMarker = null;
+                    }
+                }
+            });
+
+            // Bouton "X"
+            document.getElementById('closePopup').addEventListener('click', function () {
+                document.getElementById('popupCard').style.display = 'none';
+                if (selectedMarker && selectedMarker.setIcon) {
+                    selectedMarker.setIcon(L.divIcon({
+                        className: 'custom-fa-icon',
+                        html: `<div style="color:${selectedMarker.originalColor}; font-size:24px;">
+                                    <i class="fa-solid fa-circle"></i>
+                               </div>`,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15],
+                    }));
+                    selectedMarker = null;
                 }
             });
         });

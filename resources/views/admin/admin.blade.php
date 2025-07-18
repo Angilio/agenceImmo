@@ -22,7 +22,7 @@
     <header>
         @include('layouts.components.sideBar')
     </header>
-    <div id="contenu" class="container mt-5">
+    <div id="contenu" class="container-fluid mt-5">
         @yield('content')
     </div>
     @include('layouts.components.footer')
