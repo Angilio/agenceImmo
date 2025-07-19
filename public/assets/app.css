@@ -45,6 +45,14 @@ select {
     box-sizing: border-box; 
 }
 
+#colorCode{
+    padding-right: 30px;
+}
+
+#colorCode > p {
+    margin-bottom: 0.3rem;
+}
+
 
 .custom-fa-icon {
     font-size: 24px;

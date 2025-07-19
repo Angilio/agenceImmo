@@ -1,15 +1,20 @@
 @extends('admin.base')
+
 @section('title', 'Les 4 derniers biens')
+
 @section('content')
     <div>
-        <h1>Agence Lorem ipsum.</h1>
-        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Facere reiciendis enim nisi optio. Et culpa ratione nulla quae labore iste, alias, dolor, iure repellat dicta a fugiat id tenetur enim!</p>
+        <h1>Bienvenue chez Agence Immo Diego</h1>
+        <p>
+            Depuis plus de 10 ans, Agence Immo Diego accompagne ses clients dans la recherche et la vente de biens immobiliers de qualité à Antsiranana et ses environs. 
+            Notre équipe d'experts est dédiée à vous offrir un service personnalisé, que vous soyez acheteur, vendeur ou investisseur.
+        </p>
     </div>
     <div>
-        <h2>Nos derniers biens</h2>
-        <div class="d-flex justify-content-between flex-column flex-lg-row gap-2">
+        <h2>Nos derniers biens à la une</h2>
+        <div class="row g-2">
             @foreach ($biens as $bien)
-                <div class="">
+                <div class="col-12 col-lg-3">
                     @include('shared.card')
                 </div>
             @endforeach

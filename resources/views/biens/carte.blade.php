@@ -3,12 +3,31 @@
 @section('title', 'Les biens sur une carte')
 
 @section('content')
-    <div id="map" style="height: 100vh; z-index: 0;"></div>
+    <div class="container-fuid">
+        <h1 class="">Vue des biens sur la carte de Diego</h1>
+
+        <div class="p-3 mb-4 border rounded bg-light">
+            <h5>Code de représentation des biens :</h5>
+            <div id="colorCode" class="p-3 pt-0 py-0">
+                <p><i class="fa-solid fa-square" style="color: black;"></i> Terrain (carré)</p>
+                <p><i class="fa-solid fa-play" style="transform: rotate(-90deg); color: black;"></i> Maison (triangle)</p>
+                <p><i class="fa-solid fa-circle" style="color: black;"></i> Chambre (cercle)</p>
+            </div>
+            <h5>Code couleur :</h5>
+            <div id="colorCode" class="p-3 pt-0 py-0">
+                <p><span style="color: blue; font-weight: bold;">●</span> Vente</p>
+                <p><span style="color: gold; font-weight: bold;">●</span> Location</p>
+            </div>
+            <p><small>Cliquer sur une icône pour afficher les détails du bien. L’icône sélectionnée devient rouge.</small></p>
+        </div>
+    </div>
+
+    <div id="map" style="height: 80vh; z-index: 9999;"></div>
 
     <!-- POPUP CARD -->
     <div id="popupCard"
          class="card shadow position-fixed"
-         style="top:12%; left: 2%; width:30%; display:none; z-index:1050;">
+         style="top:12%; left: 2%; width:30%; display:none; z-index:10500;">
         <div id="carouselImages" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner" id="carousel-inner">
                 <!-- Images dynamiques -->
@@ -74,7 +93,7 @@
 
                             const color = bien.type_vente_id == 2 ? 'blue' : 'gold';
 
-                            const defaultIcon = (color) => L.divIcon({
+                            const makeIcon = (color, iconClass, rotation) => L.divIcon({
                                 className: 'custom-fa-icon',
                                 html: `<div style="color:${color}; font-size:24px; transform: rotate(${rotation});">
                                             <i class="${iconClass}"></i>
@@ -84,21 +103,26 @@
                             });
 
                             const marker = L.marker([bien.latitude, bien.longitude], {
-                                icon: defaultIcon(color)
+                                icon: makeIcon(color, iconClass, rotation)
                             }).addTo(map);
+
+                            marker.originalColor = color;
+                            marker.originalIconClass = iconClass;
+                            marker.originalRotation = rotation;
 
                             marker.on('click', (e) => {
                                 showPopup(bien);
                                 e.originalEvent.stopPropagation();
 
-                                // Reset previous icon
                                 if (selectedMarker && selectedMarker.setIcon) {
-                                    selectedMarker.setIcon(defaultIcon(selectedMarker.originalColor));
+                                    selectedMarker.setIcon(makeIcon(
+                                        selectedMarker.originalColor,
+                                        selectedMarker.originalIconClass,
+                                        selectedMarker.originalRotation
+                                    ));
                                 }
 
-                                // Set red icon
-                                marker.setIcon(defaultIcon('red'));
-                                marker.originalColor = color; // store original
+                                marker.setIcon(makeIcon('red', iconClass, rotation));
                                 selectedMarker = marker;
                             });
                         }
@@ -135,41 +159,33 @@
                 popup.style.display = 'block';
             }
 
-            // Fermer le popup si on clique à l’extérieur
-            document.addEventListener('click', function (e) {
-                const popup = document.getElementById('popupCard');
-                if (!popup.contains(e.target)) {
-                    popup.style.display = 'none';
-
-                    // Reset selected marker color
-                    if (selectedMarker && selectedMarker.setIcon) {
-                        selectedMarker.setIcon(L.divIcon({
-                            className: 'custom-fa-icon',
-                            html: `<div style="color:${selectedMarker.originalColor}; font-size:24px;">
-                                        <i class="fa-solid fa-circle"></i>
-                                   </div>`,
-                            iconSize: [30, 30],
-                            iconAnchor: [15, 15],
-                        }));
-                        selectedMarker = null;
-                    }
-                }
-            });
-
-            // Bouton "X"
-            document.getElementById('closePopup').addEventListener('click', function () {
-                document.getElementById('popupCard').style.display = 'none';
+            function resetSelectedMarker() {
                 if (selectedMarker && selectedMarker.setIcon) {
                     selectedMarker.setIcon(L.divIcon({
                         className: 'custom-fa-icon',
-                        html: `<div style="color:${selectedMarker.originalColor}; font-size:24px;">
-                                    <i class="fa-solid fa-circle"></i>
+                        html: `<div style="color:${selectedMarker.originalColor}; font-size:24px; transform: rotate(${selectedMarker.originalRotation});">
+                                    <i class="${selectedMarker.originalIconClass}"></i>
                                </div>`,
                         iconSize: [30, 30],
                         iconAnchor: [15, 15],
                     }));
                     selectedMarker = null;
                 }
+            }
+
+            // Fermer le popup si on clique à l’extérieur
+            document.addEventListener('click', function (e) {
+                const popup = document.getElementById('popupCard');
+                if (!popup.contains(e.target)) {
+                    popup.style.display = 'none';
+                    resetSelectedMarker();
+                }
+            });
+
+            // Bouton "X"
+            document.getElementById('closePopup').addEventListener('click', function () {
+                document.getElementById('popupCard').style.display = 'none';
+                resetSelectedMarker();
             });
         });
     </script>
