@@ -48,6 +48,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        redirect()->intended(route('property.index'));
+        return redirect()->intended(route('property.index'));
     }
 }
